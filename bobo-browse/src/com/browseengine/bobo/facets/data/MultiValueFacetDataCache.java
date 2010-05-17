@@ -168,9 +168,137 @@ public class MultiValueFacetDataCache<T> extends FacetDataCache<T>
     }
     
     this.valArray = list;
+    this.maxValIndex = t;
     this.freqs = freqList.toIntArray();
     this.minIDs = minIDList.toIntArray();
     this.maxIDs = maxIDList.toIntArray();
+  }
+  
+  public void load(String fieldName, IndexReader reader, TermValueList<T> sharedList) throws IOException
+  {
+    this.load(fieldName, reader, sharedList, new WorkArea());
+  }
+  
+  /**
+   * loads multi-value facet data. This method uses a workarea to prepare loading.
+   * @param fieldName
+   * @param reader
+   * @param list
+   * @param workArea
+   * @throws IOException
+   */
+  public void load(String fieldName, IndexReader reader, TermValueList<T> sharedList, WorkArea workArea) throws IOException
+  {
+    long t0 = System.currentTimeMillis();
+    int maxdoc = reader.maxDoc();
+    BufferedLoader loader = getBufferedLoader(maxdoc, workArea);
+
+    TermEnum tenum = null;
+    TermDocs tdoc = null;
+    int size = sharedList.size();
+    int[] minIDList = (size > 0 ? new int[size] : null);
+    int[] maxIDList = (size > 0 ? new int[size] : null);
+    int[] freqList = (size > 0 ? new int[size] : null);
+
+    int t = 0; // current term number
+    int maxIdx = 0;
+    if(size > 0)
+    {
+      minIDList[t] = -1;
+      maxIDList[t] = -1;
+      freqList[t] = 0;
+    }
+    _overflow = false;
+    try
+    {
+      tdoc = reader.termDocs();
+      tenum = reader.terms(new Term(fieldName, ""));
+      if (tenum != null)
+      {
+        do
+        {
+          Term term = tenum.term();
+          if (term == null || !fieldName.equals(term.field()))
+            break;
+
+          String val = term.text();
+
+          // if (val!=null && val.length()>0){
+          if (val != null)
+          {
+            t = sharedList.indexOf(term);
+            
+            if(t >= 0)
+            {
+              if(t > maxIdx) maxIdx = t;
+              
+              tdoc.seek(tenum);
+              //freqList.add(tenum.docFreq()); // removed because the df doesn't take into account the num of deletedDocs
+              int df = 0;
+              int minID = -1;
+              int maxID = -1;
+              if(tdoc.next())
+              {
+                df++;
+                int docid = tdoc.doc();
+                if(!loader.add(docid, t)) logOverflow(fieldName);
+                minID = docid;
+                while(tdoc.next())
+                {
+                  df++;
+                  docid = tdoc.doc();
+                  if(!loader.add(docid, t)) logOverflow(fieldName);
+                }
+                maxID = docid;
+              }
+              if(size > 0)
+              {
+                freqList[t] = df;
+                minIDList[t] = minID;
+                maxIDList[t] = maxID;
+              }
+            }
+          }
+        }
+        while (tenum.next());
+      }
+    }
+    finally
+    {
+      try
+      {
+        if (tdoc != null)
+        {
+          tdoc.close();
+        }
+      }
+      finally
+      {
+        if (tenum != null)
+        {
+          tenum.close();
+        }
+      }
+    }
+
+    try
+    {
+      _nestedArray.load(maxdoc, loader);
+    }
+    catch (IOException e)
+    {
+      throw e;
+    }
+    catch (Exception e)
+    {
+      throw new RuntimeException("failed to load due to " + e.toString(), e);
+    }
+    
+    this.valArray = sharedList;
+    this.maxValIndex = maxIdx + 1;
+    this.freqs = freqList;
+    this.minIDs = minIDList;
+    this.maxIDs = maxIDList;
   }
 
   /**

@@ -23,6 +23,7 @@ import com.browseengine.bobo.facets.FacetHandler;
 import com.browseengine.bobo.facets.data.FacetDataCache;
 import com.browseengine.bobo.facets.data.MultiValueFacetDataCache;
 import com.browseengine.bobo.facets.data.TermListFactory;
+import com.browseengine.bobo.facets.data.TermValueList;
 import com.browseengine.bobo.facets.filter.EmptyFilter;
 import com.browseengine.bobo.facets.filter.MultiValueFacetFilter;
 import com.browseengine.bobo.facets.filter.MultiValueORFacetFilter;
@@ -46,6 +47,7 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
   }
 
   private final TermListFactory _termListFactory;
+  private final TermValueList _sharedTermList;
   private final String _indexFieldName;
 
   private int _maxItems = BigNestedIntArray.MAX_ITEMS;
@@ -62,6 +64,7 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
     _depends = depends;
     _indexFieldName = (indexFieldName != null ? indexFieldName : name);
     _termListFactory = termListFactory;
+    _sharedTermList = null;
     _sizePayloadTerm = sizePayloadTerm;
   }
   
@@ -98,6 +101,18 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
   public MultiValueFacetHandler(String name, Set<String> depends)
   {
     this(name, name, null, null, depends);
+  }
+
+  public MultiValueFacetHandler(String name, 
+                                String indexFieldName, 
+                                TermValueList sharedTermList, 
+                                Set<String> depends) 
+  {
+    super(name, depends);
+    _depends = depends;
+    _indexFieldName = (indexFieldName != null ? indexFieldName : name);
+    _termListFactory = null;
+    _sharedTermList = sharedTermList;
   }
 
   public void setMaxItems(int maxItems)
@@ -149,7 +164,14 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
 
     if(_sizePayloadTerm == null)
     {
+      if(_termListFactory != null)
+      {
     	dataCache.load(_indexFieldName, reader, _termListFactory, workArea);
+      }
+      else
+      {
+        dataCache.load(_indexFieldName, reader, _sharedTermList, workArea);
+      }
     }
     else
     {
@@ -254,16 +276,27 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
 		
 	}
 
-  public static final class MultiValueFacetCountCollector extends DefaultFacetCountCollector
+  public static class MultiValueFacetCountCollector extends DefaultFacetCountCollector
   {
     public final BigNestedIntArray _array;
+    
+    MultiValueFacetCountCollector(String name,
+                                  MultiValueFacetDataCache dataCache,
+                                  int docBase,
+                                  BrowseSelection sel,
+                                  FacetSpec ospec)
+    {
+      this(name,dataCache,docBase,sel,ospec,null);
+    }
+
     MultiValueFacetCountCollector(String name,
     							  MultiValueFacetDataCache dataCache,
     							  int docBase,
     							  BrowseSelection sel,
-                                  FacetSpec ospec)
-                                  {
-      super(name,dataCache,docBase,sel,ospec);
+                                  FacetSpec ospec,
+                                  int[] count)
+    {
+      super(name,dataCache,docBase,sel,ospec,count);
       _array = dataCache._nestedArray;
     }
 
@@ -274,7 +307,7 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
     }
 
     @Override
-    public final void collectAll()
+    public void collectAll()
     {
       _count = _dataCache.freqs;
     }

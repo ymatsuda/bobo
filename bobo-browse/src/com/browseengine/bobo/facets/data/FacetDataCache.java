@@ -30,6 +30,7 @@ public class FacetDataCache<T> implements Serializable {
 	
 	public BigSegmentedArray orderArray;
 	public TermValueList<T> valArray;
+    public int maxValIndex;
 	public int[] freqs;
 	public int[] minIDs;
 	public int[] maxIDs;
@@ -39,6 +40,7 @@ public class FacetDataCache<T> implements Serializable {
 	{
 		this.orderArray=orderArray;
 		this.valArray=valArray;
+		this.maxValIndex = freqs.length;
 		this.freqs=freqs;
 		this.minIDs=minIDs;
 		this.maxIDs=maxIDs;
@@ -152,6 +154,7 @@ public class FacetDataCache<T> implements Serializable {
     list.seal();
 
     this.valArray = list;
+    this.maxValIndex = t;
     this.freqs = freqList.toIntArray();
     this.minIDs = minIDList.toIntArray();
     this.maxIDs = maxIDList.toIntArray();

@@ -66,21 +66,35 @@ public abstract class DefaultFacetCountCollector implements FacetCountCollector
   public DefaultFacetCountCollector(String name,FacetDataCache dataCache,int docBase,
       BrowseSelection sel,FacetSpec ospec)
   {
+    this(name, dataCache, docBase, sel, ospec, null);
+  }
+  
+  DefaultFacetCountCollector(String name,FacetDataCache dataCache,int docBase,
+                             BrowseSelection sel,FacetSpec ospec, int[] count)
+  {
     _sel = sel;
     _ospec = ospec;
     _name = name;
     _dataCache=dataCache;
-    long t0 = System.nanoTime();
-    if (_dataCache.freqs.length < 512)
+    if(count == null)
     {
-      _count = new int[_dataCache.freqs.length];
-    } else
-    {
-      _count = intarraymgr.get(_dataCache.freqs.length);//new int[_dataCache.freqs.length];
-      intarraylist.add(_count);
+      long t0 = System.nanoTime();
+      if (_dataCache.freqs.length < 512)
+      {
+        _count = new int[_dataCache.freqs.length];
+      }
+      else
+      {
+        _count = intarraymgr.get(_dataCache.freqs.length);//new int[_dataCache.freqs.length];
+        intarraylist.add(_count);
+      }
+      long t1 = System.nanoTime();
+      al.addAndGet(t1-t0);
     }
-    long t1 = System.nanoTime();
-    al.addAndGet(t1-t0);
+    else
+    {
+      _count = count;
+    }
     _array = _dataCache.orderArray;
     _docBase = docBase;
   }
