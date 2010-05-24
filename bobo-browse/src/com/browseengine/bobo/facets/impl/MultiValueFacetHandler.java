@@ -131,7 +131,7 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
   public Object[] getRawFieldValues(BoboIndexReader reader,int id){
 
 	MultiValueFacetDataCache dataCache = getFacetData(reader);
-    return new Object[]{dataCache._nestedArray.getRawData(id, dataCache.valArray)};
+    return dataCache._nestedArray.getRawData(id, dataCache.valArray);
   }
 
 
