@@ -34,6 +34,7 @@ import com.browseengine.bobo.facets.data.TermValueList;
 import com.browseengine.bobo.facets.filter.RandomAccessFilter;
 import com.browseengine.bobo.facets.impl.MultiValueFacetHandler.MultiValueFacetCountCollector;
 import com.browseengine.bobo.sort.DocComparatorSource;
+import com.browseengine.bobo.util.BigNestedIntArray;
 import com.browseengine.bobo.util.IntBoundedPriorityQueue;
 import com.browseengine.bobo.util.IntBoundedPriorityQueue.IntComparator;
 
@@ -105,7 +106,20 @@ public class GlobalCountingMultiValueFacetHandler extends RuntimeFacetHandler<Fa
       public FacetCountCollector getFacetCountCollector(BoboIndexReader reader, int docBase)
       {
         MultiValueFacetDataCache<?> dataCache = (MultiValueFacetDataCache<?>)_baseFacetHandler.getFacetData(reader);
-        return new MultiValueFacetCountCollector(getName(), dataCache, docBase, sel, fspec, _count);
+        final BigNestedIntArray array = dataCache._nestedArray;
+        final int maxIdx = dataCache.maxValIndex;
+        
+        return new MultiValueFacetCountCollector(getName(), dataCache, docBase, sel, fspec, _count)
+        {
+          @Override
+          public void collectAll()
+          {
+            for(int i = 0; i < maxIdx; i++)
+            {
+              array.countNoReturn(i, _count);
+            }
+          }
+        };
       }
     };
   }

@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 public class VirtualTermIntList extends TermNumberList<Integer>
 {
   private static Logger log = Logger.getLogger(VirtualTermIntList.class);
-
+  
   private static int parse(String s)
   {
     if (s == null || s.length() == 0)
@@ -48,7 +48,7 @@ public class VirtualTermIntList extends TermNumberList<Integer>
   public String get(int index)
   {
     DecimalFormat formatter = _formatter.get();
-    int val = (index >= 0 ? index : -1);
+    int val = (index > 0 ? (index - 1) : -1);
     if (formatter == null)
       return String.valueOf(val);
     return formatter.format(val);
@@ -56,8 +56,8 @@ public class VirtualTermIntList extends TermNumberList<Integer>
 
   public int getPrimitiveValue(int index)
   {
-    if (index >= 0)
-      return index;
+    if (index > 0)
+      return index - 1;
     else
       return -1;
   }
@@ -66,18 +66,18 @@ public class VirtualTermIntList extends TermNumberList<Integer>
   public int indexOf(Object o)
   {
     int val = parse((String) o);
-    return (val >= 0 ? val : -1);
+    return (val >= 0 ? (val + 1) : -1);
   }
 
   public int indexOf(Integer o)
   {
     int val = o.intValue();
-    return (val >= 0 ? val : -1);
+    return (val >= 0 ? (val + 1) : -1);
   }
 
   public int indexOf(int val)
   {
-    return (val >= 0 ? val : -1);
+    return (val >= 0 ? (val + 1) : -1);
   }
 
   /*
@@ -91,12 +91,12 @@ public class VirtualTermIntList extends TermNumberList<Integer>
   public int indexOfWithType(Integer o)
   {
     int val = o.intValue();
-    return (val >= 0 ? val : -1);
+    return (val >= 0 ? (val + 1) : -1);
   }
 
   public int indexOfWithType(int val)
   {
-    return (val >= 0 ? val : -1);
+    return (val >= 0 ? (val + 1) : -1);
   }
 
   @Override
