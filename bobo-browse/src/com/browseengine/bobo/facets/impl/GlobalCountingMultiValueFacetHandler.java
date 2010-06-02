@@ -133,7 +133,7 @@ public class GlobalCountingMultiValueFacetHandler extends RuntimeFacetHandler<Fa
   @Override
   public FacetDataNone load(BoboIndexReader reader) throws IOException
   {
-    _baseFacetHandler = (RangeFacetHandler)getDependedFacetHandler(_baseFacetName);
+    _baseFacetHandler = (MultiValueFacetHandler)getDependedFacetHandler(_baseFacetName);
     return FacetDataNone.instance;
   }
   

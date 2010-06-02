@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class VirtualTermIntList extends TermNumberList<Integer>
+public class VirtualTermIntList extends TermIntList
 {
   private static Logger log = Logger.getLogger(VirtualTermIntList.class);
   
@@ -35,6 +35,7 @@ public class VirtualTermIntList extends TermNumberList<Integer>
   @Override
   protected List<?> buildPrimitiveList(int capacity)
   {
+    _type = Integer.class;
     return null;
   }
 
@@ -43,7 +44,7 @@ public class VirtualTermIntList extends TermNumberList<Integer>
   {
     super.clear();
   }
-
+  
   @Override
   public String get(int index)
   {
@@ -53,13 +54,17 @@ public class VirtualTermIntList extends TermNumberList<Integer>
       return String.valueOf(val);
     return formatter.format(val);
   }
+  
+  @Override
+  public Integer getRawValue(int index)
+  {
+    return (index > 0 ? (index - 1) : -1);
+  }
 
+  @Override
   public int getPrimitiveValue(int index)
   {
-    if (index > 0)
-      return index - 1;
-    else
-      return -1;
+    return (index > 0 ? (index - 1) : -1);
   }
 
   @Override
@@ -69,12 +74,14 @@ public class VirtualTermIntList extends TermNumberList<Integer>
     return (val >= 0 ? (val + 1) : -1);
   }
 
+  @Override
   public int indexOf(Integer o)
   {
     int val = o.intValue();
     return (val >= 0 ? (val + 1) : -1);
   }
 
+  @Override
   public int indexOf(int val)
   {
     return (val >= 0 ? (val + 1) : -1);
@@ -94,6 +101,7 @@ public class VirtualTermIntList extends TermNumberList<Integer>
     return (val >= 0 ? (val + 1) : -1);
   }
 
+  @Override
   public int indexOfWithType(int val)
   {
     return (val >= 0 ? (val + 1) : -1);
@@ -119,11 +127,13 @@ public class VirtualTermIntList extends TermNumberList<Integer>
     return val >= 0;
   }
 
+  @Override
   public boolean containsWithType(int val)
   {
     return val >= 0;
   }
   
+  @Override
   public int size()
   {
     return -1;

@@ -226,7 +226,7 @@ public class MultiValueFacetDataCache<T> extends FacetDataCache<T>
           // if (val!=null && val.length()>0){
           if (val != null)
           {
-            t = sharedList.indexOf(term);
+            t = sharedList.indexOf(val);
             
             if(t >= 0)
             {

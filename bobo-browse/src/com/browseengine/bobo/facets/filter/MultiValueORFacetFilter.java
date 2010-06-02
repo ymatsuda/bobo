@@ -67,10 +67,10 @@ public class MultiValueORFacetFilter extends RandomAccessFilter
 	final MultiValueFacetDataCache dataCache = (MultiValueFacetDataCache)_facetHandler.getFacetData(reader);
 	final int[] index = _valueConverter.convert(dataCache, _vals);
 	final BigNestedIntArray nestedArray = dataCache._nestedArray;
-	final BitVector bitset = new BitVector(dataCache.valArray.size());
+	final BitVector bitset = new BitVector(dataCache.maxValIndex);
 	
 	for (int i : index){
-		bitset.set(i);
+		if(i < dataCache.maxValIndex) bitset.set(i);
     } 
 	
 	if (_takeCompliment)

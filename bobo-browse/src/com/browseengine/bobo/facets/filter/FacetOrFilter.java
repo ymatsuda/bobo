@@ -82,10 +82,10 @@ public class FacetOrFilter extends RandomAccessFilter
 		_orderArray = _dataCache.orderArray;
 	    _index = valConverter.convert(_dataCache, vals);
 	    
-	    _bitset = new BitVector(_dataCache.valArray.size());
+	    _bitset = new BitVector(_dataCache.maxValIndex);
 	    for (int i : _index)
 	    {
-	      _bitset.set(i);
+	      if(i < _dataCache.maxValIndex) _bitset.set(i);
 	    }
 	    if (takeCompliment)
 	    {

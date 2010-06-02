@@ -90,17 +90,17 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
 
   public MultiValueFacetHandler(String name, String indexFieldName)
   {
-    this(name, indexFieldName, null);
+    this(name, indexFieldName, (TermListFactory)null);
   }
 
   public MultiValueFacetHandler(String name)
   {
-    this(name, name, null);
+    this(name, name, (TermListFactory)null);
   }
   
   public MultiValueFacetHandler(String name, Set<String> depends)
   {
-    this(name, name, null, null, depends);
+    this(name, name, (TermListFactory)null, (Term)null, depends);
   }
 
   public MultiValueFacetHandler(String name, 
@@ -113,6 +113,13 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
     _indexFieldName = (indexFieldName != null ? indexFieldName : name);
     _termListFactory = null;
     _sharedTermList = sharedTermList;
+  }
+
+  public MultiValueFacetHandler(String name, 
+                                String indexFieldName, 
+                                TermValueList sharedTermList)
+  {
+    this(name, indexFieldName, sharedTermList, null);
   }
 
   public void setMaxItems(int maxItems)
@@ -164,13 +171,13 @@ public class MultiValueFacetHandler extends FacetHandler<MultiValueFacetDataCach
 
     if(_sizePayloadTerm == null)
     {
-      if(_termListFactory != null)
+      if(_sharedTermList != null)
       {
-    	dataCache.load(_indexFieldName, reader, _termListFactory, workArea);
+        dataCache.load(_indexFieldName, reader, _sharedTermList, workArea);
       }
       else
       {
-        dataCache.load(_indexFieldName, reader, _sharedTermList, workArea);
+        dataCache.load(_indexFieldName, reader, _termListFactory, workArea);
       }
     }
     else

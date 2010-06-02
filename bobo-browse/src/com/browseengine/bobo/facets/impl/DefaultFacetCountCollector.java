@@ -79,13 +79,14 @@ public abstract class DefaultFacetCountCollector implements FacetCountCollector
     if(count == null)
     {
       long t0 = System.nanoTime();
-      if (_dataCache.freqs.length < 512)
+      int size = dataCache.maxValIndex;
+      if (size < 512)
       {
-        _count = new int[_dataCache.freqs.length];
+        _count = new int[size];
       }
       else
       {
-        _count = intarraymgr.get(_dataCache.freqs.length);//new int[_dataCache.freqs.length];
+        _count = intarraymgr.get(size);//new int[_dataCache.freqs.length];
         intarraylist.add(_count);
       }
       long t1 = System.nanoTime();
